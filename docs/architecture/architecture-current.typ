@@ -865,6 +865,8 @@ Local Taylor construction retains spinor products, chains and traces after metri
 
 Diagram numerators requested with `in_lmb=True` use the stored loop-momentum basis before tensor simplification. Network parsing lowers a self-dual tensor square to a product so the selected contraction strategy also handles squares of routed momentum sums. With contracted-sum expansion enabled, Schoonschip distributes numerical coefficients after each local contraction, exposing cancellations without distributing symbolic spectator factors. Recursive parsing with no depth limit reaches contractions nested inside scalar coefficients; this does not request a global polynomial expansion.
 
+Idenso builds a depth-limited Spenso network to plan contractions. The network shares the enclosing tensor’s admitted interfaces. A tensor’s public interface lists its surviving axes. For a self-contraction such as `T(i, i)`, the public interface is scalar and the constructor still supplies two ordered incidences to the network. Each symbolic leaf carries its expression, ordered slots and checked index history. A leaf with a distinct boundary keeps its own declaration. The stored index history includes dummies that cancelled from the expression, so reopening a leaf or composing another tensor can still detect collisions. The tensor allocates its graph and reduction state on demand.
+
 Typed tensor collection uses the shared graph/tape representation to select tensor sectors and preserve unrelated scalar coefficient subtrees. Selected payloads retain their complete slots, powers and shorthand structure; collection does not promise polynomial simplification of opaque coefficients. Structural cancellations and enabled tensor identities remain available without distributing a graph numerator. Algebra reduction and contraction share a regional scheduler, with independent permissions for identity families and structural connections. A color-only request therefore reduces color payloads while retaining unrelated spin and momentum structure. Callbacks validate their resulting interfaces through that same typed boundary. Chain-projector structure inference combines the exposed slots of its factor sequence when no direct slot or index-bundle arguments are present. Enabled chain and trace materialization expands the projector through its existing owner before constructing links, so symmetric, antisymmetric and cyclic sequences retain their external indices.
 
 CFF final residue assembly validates the complete cut-key shape of every summand, then uses Symbolica's native bulk addition once per cut order. Projected sectors and direct-route selector materialization retain their already mapped branch values until this merge. This avoids repeatedly copying the growing numerator; it merges existing top-level sums without distributing product factors or constructing common denominators. After all selected forests are assembled, final factor collection protects complete functions and powers. Inverse-containing factors and selectors stay local to each occurrence; tensor sums under products retain their original contraction boundary. The collector therefore recovers common numerator factors without clearing denominators, sharing branch guards, or pulling a summed vector across independent contractions. Repeated collection stops at a fixed point.
@@ -1590,28 +1592,31 @@ The persistence model is file-system based and intentionally
 human-editable for settings/run cards, mixed with binary artifacts for
 performance-heavy data.
 
-Runtime graph fragments and retained numerator definitions encode both their
-symbolic expression and logical indexed interface, including ranked zeros and
-axis order. Loading remaps symbols and validates the declared interface;
-reduction certificates, observed graphs and other transient caches are not
-serialized. This changes the positional runtime payload from the former Atom
-fields. Earlier full GammaLoop states must be regenerated; canonical FeynKit model and
-source-recipe artifacts retain their raw-expression contract. Diagram
-DOT/JSON stores expression strings with optional logical-port metadata when
-the expression cannot recover it. Full state version 22 encodes explicit slots
-for runtime numerators, including global numerator/projector interfaces, and
-rejects unresolved ports. Standalone evaluator archives contain lowered scalar programs and
-neither runtime graphs nor retained tensor definitions, so this change leaves
-their independent amplitude version 17 and cross-section version 20 unchanged.
+Runtime graph fragments and retained numerator definitions encode the symbolic
+expression, its logical indexed interface, and its index history. This preserves
+axis order and the rank of a zero tensor. The same format covers the global
+numerator and projector. Runtime numerators require fully resolved ports.
+On load, the tensor decoder remaps symbols, checks the stored metadata for
+consistency, and restores the saved regional interfaces and raw leaf ports
+without inferring them from the expression. Reduction certificates and observed
+graphs remain transient.
+
+Canonical FeynKit models and source recipes accept raw expressions. Diagram
+DOT/JSON exports pair each retained numerator expression with its logical-port
+declaration, including an empty `[]` for a scalar. Standalone evaluator archives
+store lowered scalar programs in their own formats, amplitude version 17 and
+cross-section version 20.
 
 === Persistence Compatibility Contract
 <persistence-compatibility-contract>
-- State format is versioned with `state_manifest.toml` (`version = 22` currently).
-- Version 22 combines fully indexed tensor payloads with ordered CFF/LTD
-  expressions, evaluators and denominator catalogues. Main format20 and
-  published FeynKit format21 are incompatible predecessors; both are rejected
-  before model parsing, Symbolica import or positional process decoding.
-  Regenerate those full states from their source recipes.
+- State format is versioned with `state_manifest.toml` (`version = 23` currently).
+- Version 23 stores authoritative regional interfaces and raw leaf ports in
+  Idenso tensor archive v2. The manifest check rejects full states through
+  version 22 before model parsing, Symbolica import or process decoding.
+  Regenerate those states from their source recipes.
+- Version 22 combined fully indexed tensor payloads with ordered CFF/LTD
+  expressions, evaluators and denominator catalogues. Its predecessors were
+  main format 20 and published FeynKit format 21.
 - Parameter builders persist authoritative entries, values and pair layout;
   their derived function map is rebuilt on decode and is excluded from the
   wire payload and resume fingerprints. Parameter identities use canonical
